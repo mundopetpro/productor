@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo Pet Pro - Calculadora de Faturamento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #11998e;
+            box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+        }
+
+        .input-group .helper {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #11998e;
+            background: #f0fdf4;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #11998e;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .option-title {
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .option-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, #f0fdf4 0%, #fff 100%);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .result-header {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 25px;
+            color: #11998e;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #11998e;
+        }
+
+        .summary-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #11998e;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .summary-value {
+            color: #333;
+            font-weight: 700;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .highlight-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .highlight-value {
+            font-size: 3em;
+            font-weight: 700;
+            margin: 15px 0;
+        }
+
+        .highlight-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .comparison-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th {
+            background: #11998e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background: #f0fdf4;
+        }
+
+        .motivation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .motivation-emoji {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .motivation-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .tips-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tips-title {
+            font-size: 1.3em;
+            color: #11998e;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips-list li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .tips-list li:before {
+            content: "💰";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        .progress {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .currency {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question {
+                font-size: 1.2em;
+            }
+            
+            .highlight-value {
+                font-size: 2em;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">💰</div>
+            <h1>Mundo Pet Pro</h1>
+            <p class="subtitle">Calculadora de Previsibilidad de Faturamento</p>
+        </div>
+
+        <div class="content">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+
+            <!-- Step 0: Welcome -->
+            <div class="step active" id="step0">
+                <div style="text-align: center;">
+                    <div class="emoji">🚀</div>
+                    <h2 class="question">¡Planifica tu Negocio de Probióticos Pet!</h2>
+                    <p style="font-size: 1.1em; color: #666; margin: 20px 0;">
+                        Descubre cuánto puedes facturar y cuántos clientes necesitas para alcanzar tus metas.
+                    </p>
+                    <p style="font-size: 1em; color: #999; margin-bottom: 30px;">
+                        Solo 4 preguntas rápidas 📊
+                    </p>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep(1)">Comenzar Proyección</button>
+            </div>
+
+            <!-- Step 1: Produto -->
+            <div class="step" id="step1">
+                <h2 class="question">¿En qué producto te vas a enfocar?</h2>
+                <div class="options">
+                    <div class="option" onclick="selectProduct('elixir', this)">
+                        <div class="option-title">🥛 Elixir Blanco (Kefir)</div>
+                        <div class="option-desc">Alta demanda · Margen medio · Producción simple</div>
+                    </div>
+                    <div class="option" onclick="selectProduct('oro', this)">
+                        <div class="option-title">🍖 Oro Líquido (Caldo de Huesos)</div>
+                        <div class="option-desc">Premium · Alto margen · Requiere más tiempo</div>
+                    </div>
+                    <div class="option" onclick="selectProduct('topper', this)">
+                        <div class="option-title">🥗 Súper-Topper Vegetal</div>
+                        <div class="option-desc">Nicho vegano · Buen margen · Diferenciación</div>
+                    </div>
+                    <div class="option" onclick="selectProduct('combo', this)">
+                        <div class="option-title">🎁 Combo (3 productos)</div>
+                        <div class="option-desc">Máxima rentabilidad · Fidelización · Ticket alto</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep(2)" id="btnProduct" disabled>Continuar</button>
+                <button class="btn btn-secondary" onclick="prevStep(0)">Volver</button>
+            </div>
+
+            <!-- Step 2: Custos -->
+            <div class="step" id="step2">
+                <h2 class="question">¿Cuál es el costo de tu insumo principal?</h2>
+                <div class="input-group">
+                    <label id="insumoLabel">Precio por unidad</label>
+                    <input type="number" id="custoInsumo" min="0" step="0.01" placeholder="Ej: 5.00" 
+                           oninput="validateCost()">
+                    <p class="helper" id="insumoHelper">En dólares (USD)</p>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep(3)" id="btnCost" disabled>Continuar</button>
+                <button class="btn btn-secondary" onclick="prevStep(1)">Volver</button>
+            </div>
+
+            <!-- Step 3: Clientes -->
+            <div class="step" id="step3">
+                <h2 class="question">¿Cuántos clientes planeas atender por mes?</h2>
+                <div class="input-group">
+                    <label>Número de clientes mensuales</label>
+                    <input type="number" id="numClientes" min="1" max="1000" placeholder="Ej: 20" 
+                           oninput="validateClientes()">
+                    <p class="helper">Cantidad realista que puedes manejar</p>
+                </div>
+                <button class="btn btn-primary" onclick="nextStep(4)" id="btnClientes" disabled>Continuar</button>
+                <button class="btn btn-secondary" onclick="prevStep(2)">Volver</button>
+            </div>
+
+            <!-- Step 4: Preço de Venda -->
+            <div class="step" id="step4">
+                <h2 class="question">¿A qué precio vas a vender?</h2>
+                <div class="input-group">
+                    <label id="precoLabel">Precio de venta por unidad</label>
+                    <input type="number" id="precoVenda" min="0" step="0.01" placeholder="Ej: 15.00" 
+                           oninput="validatePreco()">
+                    <p class="helper">En dólares (USD) - considera el mercado local</p>
+                </div>
+                <button class="btn btn-primary" onclick="calcularROI()" id="btnPreco" disabled>Ver Proyección</button>
+                <button class="btn btn-secondary" onclick="prevStep(3)">Volver</button>
+            </div>
+
+            <!-- Step 5: Resultado -->
+            <div class="step" id="step5">
+                <div class="result-container">
+                    <div class="result-header">📊 Tu Proyección de Negocio</div>
+
+                    <!-- Motivação -->
+                    <div class="motivation-card">
+                        <div class="motivation-emoji">🎯</div>
+                        <div class="motivation-text" id="motivationText"></div>
+                    </div>
+
+                    <!-- Resumo do Negócio -->
+                    <div class="summary-card">
+                        <div class="summary-title">📋 Resumen de tu Negocio</div>
+                        <div class="summary-item">
+                            <span class="summary-label">Producto:</span>
+                            <span class="summary-value" id="resultProduct"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Clientes Mensuales:</span>
+                            <span class="summary-value" id="resultClientes"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Precio de Venta:</span>
+                            <span class="summary-value currency" id="resultPreco"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Costo de Producción:</span>
+                            <span class="summary-value" id="resultCusto"></span>
+                        </div>
+                    </div>
+
+                    <!-- Lucro por Unidade -->
+                    <div class="grid-2">
+                        <div class="highlight-card">
+                            <div class="highlight-title">Lucro por Unidad</div>
+                            <div class="highlight-value" id="lucroUnidade"></div>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="highlight-title">Margen de Lucro</div>
+                            <div class="highlight-value" id="margemLucro"></div>
+                        </div>
+                    </div>
+
+                    <!-- Faturamento Total -->
+                    <div class="highlight-card" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);">
+                        <div class="highlight-title">💰 FATURAMENTO MENSUAL</div>
+                        <div class="highlight-value" id="faturamentoTotal"></div>
+                        <div class="highlight-subtitle">Ingreso bruto total</div>
+                    </div>
+
+                    <!-- Lucro Líquido -->
+                    <div class="highlight-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <div class="highlight-title">✨ LUCRO LÍQUIDO MENSUAL</div>
+                        <div class="highlight-value" id="lucroLiquido"></div>
+                        <div class="highlight-subtitle">Tu ganancia real después de costos</div>
+                    </div>
+
+                    <!-- Meta de 1000 USD -->
+                    <div class="summary-card">
+                        <div class="summary-title">🎯 Para alcanzar $1,000 USD/mes</div>
+                        <div class="summary-item">
+                            <span class="summary-label">Clientes necesarios:</span>
+                            <span class="summary-value currency" id="clientesMeta"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Unidades a vender:</span>
+                            <span class="summary-value" id="unidadesMeta"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Faturamento total necesario:</span>
+                            <span class="summary-value currency" id="faturamentoMeta"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Comparativa -->
+                    <div class="comparison-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Costo Est.</th>
+                                    <th>Precio Sugerido</th>
+                                    <th>Margen Est.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>🥛 Elixir Blanco</td>
+                                    <td>$3.50</td>
+                                    <td>$12.00</td>
+                                    <td>70%</td>
+                                </tr>
+                                <tr>
+                                    <td>🍖 Oro Líquido</td>
+                                    <td>$5.00</td>
+                                    <td>$18.00</td>
+                                    <td>72%</td>
+                                </tr>
+                                <tr>
+                                    <td>🥗 Súper-Topper</td>
+                                    <td>$4.00</td>
+                                    <td>$15.00</td>
+                                    <td>73%</td>
+                                </tr>
+                                <tr style="background: #f0fdf4; font-weight: bold;">
+                                    <td>🎁 Combo</td>
+                                    <td>$12.00</td>
+                                    <td>$40.00</td>
+                                    <td>70%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Dicas -->
+                    <div class="tips-card">
+                        <div class="tips-title">💡 Consejos para Escalar tu Negocio</div>
+                        <ul class="tips-list">
+                            <li>Comienza con 5-10 clientes y aumenta gradualmente conforme domines la producción</li>
+                            <li>Ofrece paquetes mensuales para garantizar ingresos recurrentes</li>
+                            <li>El Combo tiene el mayor ticket promedio y mejor retención de clientes</li>
+                            <li>Considera descuentos por referidos para acelerar tu crecimiento</li>
+                            <li>Reinvierte el 20% de tu lucro en marketing para crecer más rápido</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="reiniciar()">Hacer Nueva Proyección</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let businessData = {
+            product: '',
+            custoInsumo: 0,
+            numClientes: 0,
+            precoVenda: 0
+        };
+
+        function updateProgress(step) {
+            const progress = (step / 5) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            updateProgress(step);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function prevStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            updateProgress(step);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectProduct(product, element) {
+            element.parentElement.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            businessData.product = product;
+            document.getElementById('btnProduct').disabled = false;
+
+            // Atualizar labels do próximo step
+            const labels = {
+                'elixir': {
+                    label: 'Precio del litro de leche de cabra',
+                    helper: 'Costo local del litro en USD'
+                },
+                'oro': {
+                    label: 'Precio del kg de huesos',
+                    helper: 'Costo local del kg en USD'
+                },
+                'topper': {
+                    label: 'Precio del kg de vegetales',
+                    helper: 'Costo promedio de vegetales en USD'
+                },
+                'combo': {
+                    label: 'Costo total de insumos del combo',
+                    helper: 'Suma de leche + huesos + vegetales en USD'
+                }
+            };
+
+            document.getElementById('insumoLabel').textContent = labels[product].label;
+            document.getElementById('insumoHelper').textContent = labels[product].helper;
+
+            const precoLabels = {
+                'elixir': 'Precio de venta por frasco (500ml)',
+                'oro': 'Precio de venda por frasco (500ml)',
+                'topper': 'Precio de venda por pote (300g)',
+                'combo': 'Precio del combo completo'
+            };
+
+            document.getElementById('precoLabel').textContent = precoLabels[product];
+        }
+
+        function validateCost() {
+            const value = parseFloat(document.getElementById('custoInsumo').value);
+            document.getElementById('btnCost').disabled = !(value > 0);
+        }
+
+        function validateClientes() {
+            const value = parseInt(document.getElementById('numClientes').value);
+            document.getElementById('btnClientes').disabled = !(value > 0);
+        }
+
+        function validatePreco() {
+            const value = parseFloat(document.getElementById('precoVenda').value);
+            document.getElementById('btnPreco').disabled = !(value > 0);
+        }
+
+        function calcularROI() {
+            // Pegar valores
+            businessData.custoInsumo = parseFloat(document.getElementById('custoInsumo').value);
+            businessData.numClientes = parseInt(document.getElementById('numClientes').value);
+            businessData.precoVenda = parseFloat(document.getElementById('precoVenda').value);
+
+            // Calcular custo de produção (insumo + 15% margem para embalagem)
+            const custoProducao = businessData.custoInsumo * 1.15;
+
+            // Lucro por unidade
+            const lucroPorUnidade = businessData.precoVenda - custoProducao;
+
+            // Margem de lucro
+            const margemLucro = ((lucroPorUnidade / businessData.precoVenda) * 100).toFixed(1);
+
+            // Faturamento total mensal
+            const faturamentoTotal = businessData.precoVenda * businessData.numClientes;
+
+            // Lucro líquido mensal
+            const lucroLiquido = lucroPorUnidade * businessData.numClientes;
+
+            // Para meta de $1000 USD
+            const clientesParaMeta = Math.ceil(1000 / lucroPorUnidade);
+            const unidadesParaMeta = clientesParaMeta;
+            const faturamentoParaMeta = clientesParaMeta * businessData.precoVenda;
+
+            // Preencher resultados
+            const productNames = {
+                'elixir': '🥛 Elixir Blanco (Kefir)',
+                'oro': '🍖 Oro Líquido (Caldo)',
+                'topper': '🥗 Súper-Topper Vegetal',
+                'combo': '🎁 Combo Completo'
+            };
+
+            document.getElementById('resultProduct').textContent = productNames[businessData.product];
+            document.getElementById('resultClientes').textContent = businessData.numClientes + ' clientes';
+            document.getElementById('resultPreco').textContent = '$' + businessData.precoVenda.toFixed(2) + ' USD';
+            document.getElementById('resultCusto').textContent = '$' + custoProducao.toFixed(2) + ' USD';
+
+            document.getElementById('lucroUnidade').textContent = '$' + lucroPorUnidade.toFixed(2);
+            document.getElementById('margemLucro').textContent = margemLucro + '%';
+
+            document.getElementById('faturamentoTotal').textContent = '$' + faturamentoTotal.toFixed(2);
+            document.getElementById('lucroLiquido').textContent = '$' + lucroLiquido.toFixed(2);
+
+            document.getElementById('clientesMeta').textContent = clientesParaMeta + ' clientes';
+            document.getElementById('unidadesMeta').textContent = unidadesParaMeta + ' unidades';
+            document.getElementById('faturamentoMeta').textContent = '$' + faturamentoParaMeta.toFixed(2) + ' USD';
+
+            // Mensagem motivacional
+            let motivationMsg = '';
+            
+            if (lucroLiquido >= 10000) {
+                motivationMsg = `¡INCREÍBLE! 🎉 Ya superaste la meta de $10,000 USD/mes. ¡Estás listo para escalar aún más tu negocio!`;
+            } else if (lucroLiquido >= 5000) {
+                motivationMsg = `¡Excelente! 🚀 Estás en $${lucroLiquido.toFixed(2)} USD/mes. Solo necesitas ${Math.ceil((10000 - lucroLiquido) / lucroPorUnidade)} clientes más para alcanzar los $10,000.`;
+            } else if (lucroLiquido >= 1000) {
+                motivationMsg = `¡Muy bien! 💪 Con ${businessData.numClientes} clientes ya generas $${lucroLiquido.toFixed(2)} USD/mes. ¡El camino a $10,000 es totalmente alcanzable!`;
+            } else {
+                motivationMsg = `¡Excelente inicio! 🌟 Con solo ${clientesParaMeta} clientes alcanzas $1,000 USD/mes. ¡Tu negocio de probióticos pet es totalmente viable!`;
+            }
+
+            document.getElementById('motivationText').textContent = motivationMsg;
+
+            nextStep(5);
+        }
+
+        function reiniciar() {
+            businessData = {
+                product: '',
+                custoInsumo: 0,
+                numClientes: 0,
+                precoVenda: 0
+            };
+            document.getElementById('custoInsumo').value = '';
+            document.getElementById('numClientes').value = '';
+            document.getElementById('precoVenda').value = '';
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                if (btn.id && btn.id.startsWith('btn')) btn.disabled = true;
+            });
+            nextStep(0);
+        }
+    </script>
+</body>
+</html>
